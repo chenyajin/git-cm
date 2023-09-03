@@ -1,0 +1,44 @@
+{
+  "name": "git-cm",
+  "version": "1.0.0",
+  "description": "a simple version of the git commit",
+  "main": "index.js",
+  "scripts": {
+    "git-cm": "node ./bin/index.js",
+    "cm": "node ./bin/index.js",
+    "build": "babel src --out-dir dist",
+    "build:watch": "babel --watch src --out-dir dist"
+  },
+  "bin": {
+    "cm": "./bin/index.js",
+    "git-cm": "./bin/index.js"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "cli"
+  ],
+  "bugs": {
+    "url": "https://github.com/chenyajin/git-cm/issues"
+  },
+  "homepage": "https://github.com/chenyajin/git-cm#readme",
+  "author": "chenyajin",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "chalk": "^5.3.0",
+    "copy-dir": "^1.3.0",
+    "dedent": "0.7.0",
+    "fs-extra": "^11.1.1",
+    "inquirer": "8.2.5",
+    "mustache": "^4.2.0",
+    "ora": "5.4.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.19.3",
+    "@babel/core": "7.20.5",
+    "@babel/plugin-proposal-object-rest-spread": "7.20.2",
+    "@babel/preset-env": "7.20.2"
+  }
+}
