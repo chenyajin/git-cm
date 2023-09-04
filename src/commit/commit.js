@@ -1,41 +1,31 @@
-import { execSync, exec, spawn } from 'child_process';
-
+/*
+ * @Author: ChenYaJin
+ * @Date: 2023-09-04 09:15:17
+ * @LastEditors: ChenYaJin
+ * @LastEditTime: 2023-09-04 09:48:10
+ * @Description: commit core
+ */
+import { execSync, spawn } from 'child_process';
 import path from 'path';
-
 import { writeFileSync, openSync, closeSync } from 'fs';
-
 import dedent from 'dedent';
-
 
 export { commit };
 
-  
-async function addAll (add) {
-  return new Promise((resolve, reject) => {
-    if (add) {
-      exec(`git add .`, () => {
-        resolve()
-      })
-    } else { 
-      resolve()
-    }
-  })
-  
-}
 /**
  * Asynchronously git commit at a given path with a message
  * @param {string} repoPath 当前执行目录
- * @param {boolean} add 是否添加到暂存区
  * @param {string} message 提交信息header(type、scope、subject)
  * @param {object} options
  * @param {function} done 回调函数
  */
-function commit (repoPath, add, message, options, done) {
-  addAll(add).then(() => {
-    commitCore(repoPath, message, options, done)
-  })
+function commit (repoPath, message, options, done) {
+  commitCore(repoPath, message, options, done)
 }
 
+/**
+ * shell of 'git commit -m'
+ */
 function commitCore (repoPath, message, options, done) {
   let called = false;
   if (!options.hookMode) {

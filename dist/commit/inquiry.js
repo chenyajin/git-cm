@@ -11,43 +11,51 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:15:17
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-04 10:41:15
+ * @LastEditTime: 2023-09-04 11:59:47
  * @Description: inquiry process
  */
 
-const config = (0, _utils.readLocalConfig)();
 function inquiryProcess() {
   return new Promise((resolve, reject) => {
     _inquirer.default.prompt([{
       type: 'list',
       name: 'type',
-      message: `(type) Select the type of change that you're committing: (Use arrow keys)`,
-      choices: config.types
+      message: _utils.config.messages.type,
+      choices: _utils.config.types
     }, {
       type: 'input',
       name: 'scope',
-      message: '(scope) Write a brief description of the scope of impact:'
+      message: _utils.config.messages.scope,
+      when: !_utils.config.skipQuestions.includes('scope'),
+      validate: function (val) {
+        if (_utils.config.requiredAnswers.includes('scope') && !val.trim()) {
+          return "Cannot be empty";
+        }
+        return true;
+      }
     }, {
       type: 'input',
       name: 'subject',
-      message: '(subject) Write a short, imperative tense description of the change:',
+      message: _utils.config.messages.subject,
       validate: function (val) {
-        if (!val) {
+        if (_utils.config.requiredAnswers.includes('subject') && !val.trim()) {
           return "Cannot be empty";
         }
-        if (val.length > 50) {
-          return "No more than 50 words";
+        if (_utils.config.subjectLimit && val.length > _utils.config.subjectLimit) {
+          return `No more than ${_utils.config.subjectLimit} words`;
         }
         return true;
       }
     }, {
       type: 'input',
       name: 'body',
-      message: '(body) Provide a longer description of change:'
+      message: _utils.config.messages.body,
+      when: !_utils.config.skipQuestions.includes('body')
     }, {
       type: 'input',
       name: 'footer',
-      message: '(footer) List any breaking changes:'
+      message: _utils.config.messages.footer,
+      when: !_utils.config.skipQuestions.includes('footer')
     }]).then(answers => {
       resolve(answers);
     }).catch(error => {

@@ -1,24 +1,41 @@
-# sync-cm-cli
- 
+# git-cm
+
 A simple tool to allow you to easily commit your files.
 
-## Install
-In order to install, run
+## Installing the command line tool
 
-    > npm install -g sync-cm-cli
+Installation is as simple as running the following command (if you see `EACCES` error, reading [fixing npm permissions](https://docs.npmjs.com/getting-started/fixing-npm-permissions) may help):
 
-## To Run
+```sh
+npm install -g git-cm
+```
 
-### Commit
- Choose different types and enter the main information to complete the
- submission of the git commit.
+## Using the command line tool
 
-    > cm
-    > git-cm
+Simply use `git-cm` or `cm` instead of `git commit` when committing.
 
-**Example**
+Supported command line options
 
-    > git-cm -a 
+```sh
+git-cm
+git-cm -a
+git-cm -m 'type(scope): subject'
+git-cm -am 'type(scope): subject'
+```
 
-#### 1.0.4
-* First Working 
+or as an npm script:
+
+```json
+  ...
+  "scripts": {
+    "commit": "git-cm"
+  }
+```
+
+when you use `git-cm`, without a committing message, you'll be prompted to fill out any required commit fields at commit time with a format of the default configuration file.
+
+you can see the format of the default configuration file in [gitcommitrc-example.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc-example.json)
+
+Of course, you can also create `gitcommitrc.json` file in your home directory, to overwriting the default file.
+
+when you use `git-cm`, with a committing message, such as `git-cm -m 'type(scope): subject'`, the message will be verified, whether to use [AngularJS's commit message convention](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines).

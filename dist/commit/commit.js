@@ -9,30 +9,28 @@ var _path = _interopRequireDefault(require("path"));
 var _fs = require("fs");
 var _dedent = _interopRequireDefault(require("dedent"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-async function addAll(add) {
-  return new Promise((resolve, reject) => {
-    if (add) {
-      (0, _child_process.exec)(`git add .`, () => {
-        resolve();
-      });
-    } else {
-      resolve();
-    }
-  });
-}
+/*
+ * @Author: ChenYaJin
+ * @Date: 2023-09-04 09:15:17
+ * @LastEditors: ChenYaJin
+ * @LastEditTime: 2023-09-04 09:48:10
+ * @Description: commit core
+ */
+
 /**
  * Asynchronously git commit at a given path with a message
  * @param {string} repoPath 当前执行目录
- * @param {boolean} add 是否添加到暂存区
  * @param {string} message 提交信息header(type、scope、subject)
  * @param {object} options
  * @param {function} done 回调函数
  */
-function commit(repoPath, add, message, options, done) {
-  addAll(add).then(() => {
-    commitCore(repoPath, message, options, done);
-  });
+function commit(repoPath, message, options, done) {
+  commitCore(repoPath, message, options, done);
 }
+
+/**
+ * shell of 'git commit -m'
+ */
 function commitCore(repoPath, message, options, done) {
   let called = false;
   if (!options.hookMode) {
