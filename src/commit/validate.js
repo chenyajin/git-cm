@@ -6,12 +6,6 @@
  * @Description: verify format of the commit message
  */
 import {
-  YELLOW,
-  GRAY,
-  RED,
-  GREEN,
-  EOS,
-  BOLD,
   config,
   debug
 } from '../utils/index'
@@ -42,7 +36,6 @@ function validateMessage (message) {
   const minLen = config.minLen || 0
   const scopeRequired = config.scopeRequired
   const showInvalidHeader = true
-  const example = 'docs: update README'
 
   if (message.length > maxLen || message.length < minLen) {
     invalidLength = true
@@ -55,21 +48,15 @@ function validateMessage (message) {
     displayError(
       {
         invalidFormat: true,
-        invalidType: true
+        invalidType: true,
+        invalidLength: true
       },
       {
         mergedTypes,
         maxLen,
         minLen,
         message,
-        example,
         showInvalidHeader,
-        // scopeDescriptions,
-        // invalidScopeDescriptions: invalidScopeDescriptions,
-        // subjectDescriptions,
-        // postSubjectDescriptions,
-        // invalidSubjectDescriptions,
-        // lang,
         scopeRequired,
       }
     )
@@ -82,10 +69,10 @@ function validateMessage (message) {
   const types = Object.keys(mergedTypes)
   const invalidType = !types.includes(type)
   const [invalidScope, reason] = isInvalidScope(scope, { scopeRequired })
-
   // Don't capitalize first letter; No dot (.) at the end
   const invalidSubject = isUpperCase(subject[0]) || subject.endsWith('.');
 
+  isValid = !invalidLength && !invalidType && !invalidScope && !invalidSubject
   if (invalidLength || invalidType || invalidScope || invalidSubject) {
     displayError(
       {
@@ -96,14 +83,7 @@ function validateMessage (message) {
         maxLen,
         minLen,
         message,
-        example,
         showInvalidHeader,
-        // scopeDescriptions,
-        // invalidScopeDescriptions: invalidScopeDescriptions,
-        // subjectDescriptions,
-        // postSubjectDescriptions,
-        // invalidSubjectDescriptions,
-        // lang,
         scopeRequired,
       }
     )
@@ -116,7 +96,6 @@ function validateMessage (message) {
 function resolvePatterns (message) {
   const PATTERN = /^(?:\s*)?(\w*)(\(([\w\$\.\*/-]*)\))?\: (.*)$/;
   const matches = PATTERN.exec(message);
-  debug(matches)
 
   if (matches) {
     const type = matches[1];
@@ -152,7 +131,6 @@ function isInvalidScope (scope, { scopeRequired }) {
   return [false];
 }
 
-// https://github.com/legend80s/git-commit-msg-linter/blob/master/packages/commit-msg-linter/commit-msg-linter.js#L479
 function displayError (
   {
     invalidLength = false,
@@ -167,16 +145,7 @@ function displayError (
     maxLen,
     minLen,
     message,
-    example,
     showInvalidHeader,
-
-    scopeDescriptions = [],
-    invalidScopeDescriptions = [],
-    subjectDescriptions = [],
-    postSubjectDescriptions = [],
-    invalidSubjectDescriptions = [],
-
-    lang = 'zh-CN',
     scopeRequired,
   },
 ) {
@@ -189,34 +158,35 @@ function displayError (
   const typeDescriptions = describeTypes(mergedTypes, suggestedType);
 
   const invalid = invalidLength || invalidFormat || invalidType || invalidScope || invalidSubject;
+  const langKeys = Object.keys(langs)
+  const lang = langKeys.includes(config.lang) ? config.lang : 'en-US'
   const translated = langs[lang].i18n;
   const { invalidHeader } = translated;
   const header = !showInvalidHeader
     ? ''
-    : chalk.yellow(`\n  ************* ${invalidHeader} **************`);
-
+    : chalk.redBright(`\n  ************* ${invalidHeader} **************`);
+  
+  const { scope: scopeDescriptions, subject: subjectDescriptions, example: exampleMessage } = langs[lang].descriptions
   const scopeDescription = scopeDescriptions.join('\n    ');
-  const invalidScopeDescription = invalidScopeDescriptions.join('\n    ');
-  const defaultInvalidScopeDescription = `scope can be ${emphasis('optional')}${RED}, but its parenthesis if exists cannot be empty.`;
-
   const subjectDescription = subjectDescriptions.join('\n    ');
-  let postSubjectDescription = postSubjectDescriptions.join('\n    ');
-  postSubjectDescription = postSubjectDescription ? `\n\n    ${italic(postSubjectDescription)}` : '';
-
-  const invalidSubjectDescription = invalidSubjectDescriptions.join('\n    ');
-
   const { example: labelExample, correctFormat, commitMessage } = translated;
 
-  const correctedExample = example;
+  const correctedExample = invalidType ? didYouMean(message, {types, example: exampleMessage}) : exampleMessage;
 
   console.info(
-    `${header}${invalid ? `
-  ${label(`${commitMessage}:`)}  ${chalk.redBright(message)}` : ''}${generateInvalidLengthTips(message, invalidLength, maxLen, minLen, lang)}
+    `${header}${`
+  ${label(`${commitMessage}:`)}  ${chalk.redBright(message)}`}${generateInvalidLengthTips(message, invalidLength, maxLen, minLen, lang)}
   ${label(`${correctFormat}:`)} ${chalk.greenBright(`${decoratedType}${scope}: ${subject}`)}
   ${label(`${labelExample}:`)} ${chalk.greenBright(`${correctedExample}`)}
   
-  ${chalk.yellow('type:')}
+  ${invalidType ? chalk.redBright('type:') : chalk.yellowBright('type:')}
     ${typeDescriptions}
+
+  ${invalidScope ? chalk.redBright('scope:') : chalk.yellowBright('scope:')}
+     ${chalk.bold(scopeDescription)}
+
+  ${invalidSubject ? chalk.redBright('subject:') : chalk.yellowBright('subject:')}
+     ${chalk.bold(subjectDescription)}
   `,
   );
 }
@@ -230,35 +200,6 @@ function getMergedTypesObj() {
   return types
 }
 
-
-// ${invalidType ? RED : YELLOW}type:
-// ${typeDescriptions}
-
-// ${invalidScope ? RED : YELLOW}scope:
-// ${GRAY}${scopeDescription}${invalidScope ? `${RED}
-// ${invalidScopeDescription || defaultInvalidScopeDescription}` : ''}
-
-// ${invalidSubject ? RED : YELLOW}subject:
-// ${GRAY}${subjectDescription}${postSubjectDescription}${invalidSubject ? `${RED}
-// ${invalidSubjectDescription}` : ''}
-
-
-/**
- * Decorate the part of pattern.
- *
- * @param {string} text Text to decorate
- * @param {boolean} invalid Whether the part is invalid
- * @param {boolean} required For example `scope` is optional
- *
- * @returns {string}
- */
-function decorate (text, invalid, required = true) {
-  if (invalid) {
-    return `${RED}${addPeripherals(underline(text) + RED, required)}`;
-  }
-
-  return `${GREEN}${addPeripherals(text, required)}`;
-}
 
 /**
  * Add peripherals.
@@ -280,17 +221,6 @@ function addPeripherals (text, required = true) {
   }
 
   return `(${text})`;
-}
-
-/**
- * Make text underlined.
- * @param {string} text
- * @returns {string}
- */
-function underline (text) {
-  const UNDERLINED = '\x1b[4m';
-
-  return `${UNDERLINED}${text}${EOS}`;
 }
 
 /**
@@ -337,7 +267,6 @@ function describeTypes (mergedTypes, suggestedType = '') {
 function describe({
   index, type, description, maxTypeLength,
 }) {
-  const typeColor = YELLOW
   const paddingBefore = index === 0 ? '' : nSpaces(4);
   const marginRight = nSpaces(maxTypeLength - type.length + 1);
 
@@ -354,18 +283,6 @@ function nSpaces(n) {
   const space = ' ';
 
   return space.repeat(n);
-}
-
-/**
- * Put emphasis on text.
- * @param {string} text
- * @returns {string}
- */
-function emphasis(text) {
-  const ITALIC = '\x1b[3m';
-  const UNDERLINED = '\x1b[4m';
-
-  return `${ITALIC}${UNDERLINED}${text}${EOS}`;
 }
 
 /**
@@ -389,13 +306,44 @@ function label(text) {
  */
 function generateInvalidLengthTips(message, invalid, maxLen, minLen, lang) {
   if (invalid) {
-    const max = `${BOLD}${maxLen}${EOS}${RED}`;
-    const min = `${BOLD}${minLen}${EOS}${RED}`;
-    // eslint-disable-next-line no-shadow
+    const max = chalk.redBright(maxLen);
+    const min = chalk.redBright(minLen);
     const { i18n } = langs[lang];
-    const tips = `${RED}${i18n.length} ${BOLD}${message.length}${EOS}${RED}. ${format(i18n.invalidLengthTip, max, min)}${EOS}`;
-    return `\n  ${BOLD}${i18n.invalidLength}${EOS}: ${tips}`;
+    const tips = `${chalk.redBright(i18n.length)} ${chalk.magenta(message.length)}. ${chalk.bold.redBright(format(i18n.invalidLengthTip, max, min))}`;
+    return `\n  ${chalk.bold(i18n.invalidLength)}: ${tips}`;
   }
 
   return '';
+}
+
+/**
+ * Replaces numeric arguments inside curly brackets with their corresponding values.
+ *
+ * @param {string} text A text with arguments between curly brackets
+ * @param  {any[]} args Values to replace the arguments
+ * @returns
+ */
+function format(text, ...args) {
+  return text.replace(/\{(\d+)\}/g, (_, i) => chalk.magenta(args[i - 1]));
+}
+
+function didYouMean(message, { types, example }) {
+  const patterns = resolvePatterns(message);
+
+  if (!patterns && !patterns.type) {
+    return example;
+  }
+
+  const { type } = patterns;
+
+  // Get the closest match
+  const suggestedType = suggestType(type, types);
+
+  if (!suggestedType) {
+    return example;
+  }
+
+  const TYPE_REGEXP = /^\w+(\(\w*\))?:/;
+
+  return message.replace(TYPE_REGEXP, (_, p1) => (p1 && p1 !== '()' ? `${suggestedType}${p1}:` : `${suggestedType}:`));
 }

@@ -29,16 +29,16 @@
       "name": "Adding missing tests or correcting existing tests"
     },
     {
-      "value": "cli",
-      "name": "Modify configuration files or scripts for CI"
+      "value": "ci",
+      "name": "Changes to your CI configuration files and scripts"
     },
     {
       "value": "build",
-      "name": "Build tools or modify dependency packages"
+      "name": "Changes that affect the build system or external dependencies"
     },
     {
       "value": "chore",
-      "name": "Change the build process or auxiliary tools and libraries such as documentation generation"
+      "name": "Changes to the build process or auxiliary tools and libraries such as documentation generation."
     }
   ],
   "messages": {
@@ -49,8 +49,9 @@
     "footer": "(footer) List any breaking changes:"
   },
   "maxLen": 100,
-  "minLen": 0,
+  "minLen": 2,
   "subjectLimit": 50,
   "skipQuestions": ["body", "footer"],
-  "scopeRequired": false
+  "scopeRequired": false,
+  "lang": "en-US"
 }

@@ -6,20 +6,6 @@ export default getLangs
 function getLangs () {
   return {
     'en-US': {
-      stereotypes: {
-        feat: 'A new feature.',
-        fix: 'A bug fix.',
-        docs: 'Documentation only changes.',
-        style: 'Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc).',
-        refactor: 'A code change that neither fixes a bug nor adds a feature.',
-        test: 'Adding missing tests or correcting existing ones.',
-        chore: 'Changes to the build process or auxiliary tools and libraries such as documentation generation.',
-        // added
-        perf: 'A code change that improves performance.',
-        ci: 'Changes to your CI configuration files and scripts.',
-        build: 'Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm).',
-        temp: 'Temporary commit that won\'t be included in your CHANGELOG.',
-      },
       descriptions: {
         example: config.scopeRequired
           ? 'docs(README): add developer tips'
@@ -28,7 +14,6 @@ function getLangs () {
         scope: [
           `${config.scopeRequired ? 'Required'
             : 'Optional'}, can be anything specifying the scope of the commit change.`,
-          'For example $location, $browser, $compile, $rootScope, ngHref, ngClick, ngView, etc.',
           'In App Development, scope can be a page, a module or a component.',
         ],
         invalidScope: [
@@ -55,20 +40,6 @@ function getLangs () {
     },
 
     'zh-CN': {
-      stereotypes: {
-        feat: '产品新功能：通常是能够让用户觉察到的变化，小到文案或样式修改',
-        fix: '修复 bug',
-        docs: '更新文档或注释',
-        style: '代码格式调整，对逻辑无影响：比如为按照 eslint 或团队风格修改代码格式。注意不是 UI 变更',
-        refactor: '重构：不影响现有功能或添加功能。比如文件、变量重命名，代码抽象为函数，消除魔法数字等',
-        test: '单测相关变更',
-        chore: '杂项：其他无法归类的变更，比如代码合并',
-        // added
-        perf: '性能提升变更',
-        ci: '持续集成相关变更',
-        build: '代码构建相关变更：比如修复部署时的构建问题、构建脚本 webpack 或 gulp 相关变更',
-        temp: '临时代码：不计入 CHANGELOG，比如必须部署到某种环境才能测试的变更',
-      },
       descriptions: {
         example: config.scopeRequired
           ? 'docs(README): 添加开发者部分'

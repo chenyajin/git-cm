@@ -36,7 +36,6 @@ function validateMessage(message) {
   const minLen = _index.config.minLen || 0;
   const scopeRequired = _index.config.scopeRequired;
   const showInvalidHeader = true;
-  const example = 'docs: update README';
   if (message.length > maxLen || message.length < minLen) {
     invalidLength = true;
     isValid = false;
@@ -45,20 +44,14 @@ function validateMessage(message) {
   if (!matches) {
     displayError({
       invalidFormat: true,
-      invalidType: true
+      invalidType: true,
+      invalidLength: true
     }, {
       mergedTypes,
       maxLen,
       minLen,
       message,
-      example,
       showInvalidHeader,
-      // scopeDescriptions,
-      // invalidScopeDescriptions: invalidScopeDescriptions,
-      // subjectDescriptions,
-      // postSubjectDescriptions,
-      // invalidSubjectDescriptions,
-      // lang,
       scopeRequired
     });
     return false;
@@ -74,9 +67,9 @@ function validateMessage(message) {
   const [invalidScope, reason] = isInvalidScope(scope, {
     scopeRequired
   });
-
   // Don't capitalize first letter; No dot (.) at the end
   const invalidSubject = isUpperCase(subject[0]) || subject.endsWith('.');
+  isValid = !invalidLength && !invalidType && !invalidScope && !invalidSubject;
   if (invalidLength || invalidType || invalidScope || invalidSubject) {
     displayError({
       invalidLength,
@@ -89,14 +82,7 @@ function validateMessage(message) {
       maxLen,
       minLen,
       message,
-      example,
       showInvalidHeader,
-      // scopeDescriptions,
-      // invalidScopeDescriptions: invalidScopeDescriptions,
-      // subjectDescriptions,
-      // postSubjectDescriptions,
-      // invalidSubjectDescriptions,
-      // lang,
       scopeRequired
     });
   }
@@ -107,7 +93,6 @@ function validateMessage(message) {
 function resolvePatterns(message) {
   const PATTERN = /^(?:\s*)?(\w*)(\(([\w\$\.\*/-]*)\))?\: (.*)$/;
   const matches = PATTERN.exec(message);
-  (0, _index.debug)(matches);
   if (matches) {
     const type = matches[1];
     const scope = matches[3];
@@ -140,8 +125,6 @@ function isInvalidScope(scope, {
   }
   return [false];
 }
-
-// https://github.com/legend80s/git-commit-msg-linter/blob/master/packages/commit-msg-linter/commit-msg-linter.js#L479
 function displayError({
   invalidLength = false,
   invalidFormat = false,
@@ -154,14 +137,7 @@ function displayError({
   maxLen,
   minLen,
   message,
-  example,
   showInvalidHeader,
-  scopeDescriptions = [],
-  invalidScopeDescriptions = [],
-  subjectDescriptions = [],
-  postSubjectDescriptions = [],
-  invalidSubjectDescriptions = [],
-  lang = 'zh-CN',
   scopeRequired
 }) {
   const decoratedType = addPeripherals('type', true);
@@ -171,31 +147,42 @@ function displayError({
   const suggestedType = suggestType(type, types);
   const typeDescriptions = describeTypes(mergedTypes, suggestedType);
   const invalid = invalidLength || invalidFormat || invalidType || invalidScope || invalidSubject;
+  const langKeys = Object.keys(langs);
+  const lang = langKeys.includes(_index.config.lang) ? _index.config.lang : 'en-US';
   const translated = langs[lang].i18n;
   const {
     invalidHeader
   } = translated;
-  const header = !showInvalidHeader ? '' : _chalk.default.yellow(`\n  ************* ${invalidHeader} **************`);
+  const header = !showInvalidHeader ? '' : _chalk.default.redBright(`\n  ************* ${invalidHeader} **************`);
+  const {
+    scope: scopeDescriptions,
+    subject: subjectDescriptions,
+    example: exampleMessage
+  } = langs[lang].descriptions;
   const scopeDescription = scopeDescriptions.join('\n    ');
-  const invalidScopeDescription = invalidScopeDescriptions.join('\n    ');
-  const defaultInvalidScopeDescription = `scope can be ${emphasis('optional')}${_index.RED}, but its parenthesis if exists cannot be empty.`;
   const subjectDescription = subjectDescriptions.join('\n    ');
-  let postSubjectDescription = postSubjectDescriptions.join('\n    ');
-  postSubjectDescription = postSubjectDescription ? `\n\n    ${italic(postSubjectDescription)}` : '';
-  const invalidSubjectDescription = invalidSubjectDescriptions.join('\n    ');
   const {
     example: labelExample,
     correctFormat,
     commitMessage
   } = translated;
-  const correctedExample = example;
-  console.info(`${header}${invalid ? `
-  ${label(`${commitMessage}:`)}  ${_chalk.default.redBright(message)}` : ''}${generateInvalidLengthTips(message, invalidLength, maxLen, minLen, lang)}
+  const correctedExample = invalidType ? didYouMean(message, {
+    types,
+    example: exampleMessage
+  }) : exampleMessage;
+  console.info(`${header}${`
+  ${label(`${commitMessage}:`)}  ${_chalk.default.redBright(message)}`}${generateInvalidLengthTips(message, invalidLength, maxLen, minLen, lang)}
   ${label(`${correctFormat}:`)} ${_chalk.default.greenBright(`${decoratedType}${scope}: ${subject}`)}
   ${label(`${labelExample}:`)} ${_chalk.default.greenBright(`${correctedExample}`)}
   
-  ${_chalk.default.yellow('type:')}
+  ${invalidType ? _chalk.default.redBright('type:') : _chalk.default.yellowBright('type:')}
     ${typeDescriptions}
+
+  ${invalidScope ? _chalk.default.redBright('scope:') : _chalk.default.yellowBright('scope:')}
+     ${_chalk.default.bold(scopeDescription)}
+
+  ${invalidSubject ? _chalk.default.redBright('subject:') : _chalk.default.yellowBright('subject:')}
+     ${_chalk.default.bold(subjectDescription)}
   `);
 }
 function getMergedTypesObj() {
@@ -204,33 +191,6 @@ function getMergedTypesObj() {
     types[item.value] = item.name;
   });
   return types;
-}
-
-// ${invalidType ? RED : YELLOW}type:
-// ${typeDescriptions}
-
-// ${invalidScope ? RED : YELLOW}scope:
-// ${GRAY}${scopeDescription}${invalidScope ? `${RED}
-// ${invalidScopeDescription || defaultInvalidScopeDescription}` : ''}
-
-// ${invalidSubject ? RED : YELLOW}subject:
-// ${GRAY}${subjectDescription}${postSubjectDescription}${invalidSubject ? `${RED}
-// ${invalidSubjectDescription}` : ''}
-
-/**
- * Decorate the part of pattern.
- *
- * @param {string} text Text to decorate
- * @param {boolean} invalid Whether the part is invalid
- * @param {boolean} required For example `scope` is optional
- *
- * @returns {string}
- */
-function decorate(text, invalid, required = true) {
-  if (invalid) {
-    return `${_index.RED}${addPeripherals(underline(text) + _index.RED, required)}`;
-  }
-  return `${_index.GREEN}${addPeripherals(text, required)}`;
 }
 
 /**
@@ -252,16 +212,6 @@ function addPeripherals(text, required = true) {
     return `<${text}>`;
   }
   return `(${text})`;
-}
-
-/**
- * Make text underlined.
- * @param {string} text
- * @returns {string}
- */
-function underline(text) {
-  const UNDERLINED = '\x1b[4m';
-  return `${UNDERLINED}${text}${_index.EOS}`;
 }
 
 /**
@@ -307,7 +257,6 @@ function describe({
   description,
   maxTypeLength
 }) {
-  const typeColor = _index.YELLOW;
   const paddingBefore = index === 0 ? '' : nSpaces(4);
   const marginRight = nSpaces(maxTypeLength - type.length + 1);
   return `${paddingBefore}${_chalk.default.yellow(type)}${marginRight}${_chalk.default.bold(description)}`;
@@ -322,17 +271,6 @@ function describe({
 function nSpaces(n) {
   const space = ' ';
   return space.repeat(n);
-}
-
-/**
- * Put emphasis on text.
- * @param {string} text
- * @returns {string}
- */
-function emphasis(text) {
-  const ITALIC = '\x1b[3m';
-  const UNDERLINED = '\x1b[4m';
-  return `${ITALIC}${UNDERLINED}${text}${_index.EOS}`;
 }
 
 /**
@@ -356,14 +294,44 @@ function label(text) {
  */
 function generateInvalidLengthTips(message, invalid, maxLen, minLen, lang) {
   if (invalid) {
-    const max = `${_index.BOLD}${maxLen}${_index.EOS}${_index.RED}`;
-    const min = `${_index.BOLD}${minLen}${_index.EOS}${_index.RED}`;
-    // eslint-disable-next-line no-shadow
+    const max = _chalk.default.redBright(maxLen);
+    const min = _chalk.default.redBright(minLen);
     const {
       i18n
     } = langs[lang];
-    const tips = `${_index.RED}${i18n.length} ${_index.BOLD}${message.length}${_index.EOS}${_index.RED}. ${format(i18n.invalidLengthTip, max, min)}${_index.EOS}`;
-    return `\n  ${_index.BOLD}${i18n.invalidLength}${_index.EOS}: ${tips}`;
+    const tips = `${_chalk.default.redBright(i18n.length)} ${_chalk.default.magenta(message.length)}. ${_chalk.default.bold.redBright(format(i18n.invalidLengthTip, max, min))}`;
+    return `\n  ${_chalk.default.bold(i18n.invalidLength)}: ${tips}`;
   }
   return '';
+}
+
+/**
+ * Replaces numeric arguments inside curly brackets with their corresponding values.
+ *
+ * @param {string} text A text with arguments between curly brackets
+ * @param  {any[]} args Values to replace the arguments
+ * @returns
+ */
+function format(text, ...args) {
+  return text.replace(/\{(\d+)\}/g, (_, i) => _chalk.default.magenta(args[i - 1]));
+}
+function didYouMean(message, {
+  types,
+  example
+}) {
+  const patterns = resolvePatterns(message);
+  if (!patterns && !patterns.type) {
+    return example;
+  }
+  const {
+    type
+  } = patterns;
+
+  // Get the closest match
+  const suggestedType = suggestType(type, types);
+  if (!suggestedType) {
+    return example;
+  }
+  const TYPE_REGEXP = /^\w+(\(\w*\))?:/;
+  return message.replace(TYPE_REGEXP, (_, p1) => p1 && p1 !== '()' ? `${suggestedType}${p1}:` : `${suggestedType}:`);
 }
