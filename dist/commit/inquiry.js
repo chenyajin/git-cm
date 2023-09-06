@@ -28,7 +28,7 @@ function inquiryProcess() {
       message: _utils.config.messages.scope,
       when: !_utils.config.skipQuestions.includes('scope'),
       validate: function (val) {
-        if (_utils.config.requiredAnswers.includes('scope') && !val.trim()) {
+        if (_utils.config.scopeRequired && !val.trim()) {
           return "Cannot be empty";
         }
         return true;
@@ -38,7 +38,7 @@ function inquiryProcess() {
       name: 'subject',
       message: _utils.config.messages.subject,
       validate: function (val) {
-        if (_utils.config.requiredAnswers.includes('subject') && !val.trim()) {
+        if (!val.trim()) {
           return "Cannot be empty";
         }
         if (_utils.config.subjectLimit && val.length > _utils.config.subjectLimit) {

@@ -50,5 +50,5 @@
   },
   "subjectLimit": 100,
   "skipQuestions": ["scope", "body", "footer"],
-  "requiredAnswers": ["type", "subject"]
+  "scopeRequired": false
 }

@@ -2,14 +2,14 @@
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:15:17
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-04 15:14:48
+ * @LastEditTime: 2023-09-06 18:16:34
  * @Description: options parse
  */
 import { inquiryProcess } from './inquiry'
 import { log } from './log'
 import { commit } from './commit'
 import { addAll } from './add'
-import { resolvePatterns } from './validate'
+import { validateMessage, resolvePatterns } from './validate'
 
 /**
  * git-cm -a
@@ -30,29 +30,36 @@ const parseOptions = async (options) => {
 /**
  * confirm message by prompt
  */
-const commitMessageByPrompt = () => {
+function commitMessageByPrompt () {
   inquiryProcess().then(answer => {
     const { type, scope, subject, body, footer } = answer
-    let message = scope ? type + '(' + scope + ')' : type
-    message += `: ${subject}`
-    commit(process.cwd(), message, {}, function (error) {
-      if (error) {
-        console.log(error)
-        return
-      }
-      log(process.cwd(), function (logOutput) {
-        console.log(logOutput)
-      });
-    })
+    commitByMessage(type, scope, subject)
   })
 }
 
 /**
  * confirm message by input
  */
-const commitMessageByInput = (message) => {
-  const matches = resolvePatterns(message)
-  console.log('matches', matches)
+function commitMessageByInput (message) {
+  const isValid = validateMessage(message)
+  if (isValid) {
+    const { type, scope, subject } = resolvePatterns(message)
+    commitByMessage(type, scope, subject)
+  }
+}
+
+function commitByMessage (type, scope, subject) {
+  let message = scope ? type + '(' + scope + ')' : type
+  message += `: ${subject}`
+  commit(process.cwd(), message, {}, function (error) {
+    if (error) {
+      console.log(error)
+      return
+    }
+    log(process.cwd(), function (logOutput) {
+      console.log(logOutput)
+    });
+  })
 }
 
 export default parseOptions

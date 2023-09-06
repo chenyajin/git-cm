@@ -7,9 +7,18 @@ const YELLOW = colorSupported ? '\x1b[1;33m' : '';
 const GRAY = colorSupported ? '\x1b[0;37m' : '';
 const RED = colorSupported ? '\x1b[0;31m' : '';
 const GREEN = colorSupported ? '\x1b[0;32m' : '';
+const EOS = colorSupported ? '\x1b[0m' : '';
+const BOLD = colorSupported ? '\x1b[1m' : '';
 
 export {
-  config
+  config,
+  debug,
+  YELLOW,
+  GRAY,
+  RED,
+  GREEN,
+  EOS,
+  BOLD
 }
 
 const localConfig = readLocalConfig()
@@ -19,7 +28,7 @@ const config = { ...defaultConfig, ...localConfig }
 /** Read local configuration file */
 /** If the current directory does not have a configuration file, read the default file */
 function readLocalConfig () {
-  let filename = path.resolve(process.cwd(), 'gitcommitrc-local.json');
+  let filename = path.resolve(process.cwd(), 'gitcommitrc.json');
   let packageName = `${YELLOW}git-cm`;
   let content = '{}';
 
@@ -80,4 +89,13 @@ function readDefaultConfig () {
   }
 
   return configObject;
+}
+
+/**
+ * Output debugging information.
+ * @param  {any[]} args
+ * @returns {void}
+ */
+function debug(...args) {
+  console.info(`${GREEN}[DEBUG]`, ...args, EOS);
 }

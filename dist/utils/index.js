@@ -3,7 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.config = void 0;
+exports.config = exports.YELLOW = exports.RED = exports.GREEN = exports.GRAY = exports.EOS = exports.BOLD = void 0;
+exports.debug = debug;
 var _path = _interopRequireDefault(require("path"));
 var _fs = require("fs");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -14,9 +15,17 @@ function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typ
 function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 const colorSupported = false;
 const YELLOW = colorSupported ? '\x1b[1;33m' : '';
+exports.YELLOW = YELLOW;
 const GRAY = colorSupported ? '\x1b[0;37m' : '';
+exports.GRAY = GRAY;
 const RED = colorSupported ? '\x1b[0;31m' : '';
+exports.RED = RED;
 const GREEN = colorSupported ? '\x1b[0;32m' : '';
+exports.GREEN = GREEN;
+const EOS = colorSupported ? '\x1b[0m' : '';
+exports.EOS = EOS;
+const BOLD = colorSupported ? '\x1b[1m' : '';
+exports.BOLD = BOLD;
 const localConfig = readLocalConfig();
 const defaultConfig = readDefaultConfig();
 const config = _objectSpread(_objectSpread({}, defaultConfig), localConfig);
@@ -25,7 +34,7 @@ const config = _objectSpread(_objectSpread({}, defaultConfig), localConfig);
 /** If the current directory does not have a configuration file, read the default file */
 exports.config = config;
 function readLocalConfig() {
-  let filename = _path.default.resolve(process.cwd(), 'gitcommitrc-local.json');
+  let filename = _path.default.resolve(process.cwd(), 'gitcommitrc.json');
   let packageName = `${YELLOW}git-cm`;
   let content = '{}';
   try {
@@ -78,4 +87,13 @@ function readDefaultConfig() {
     console.error(`${packageName}: ${RED}gitcommitrc.json ignored because of invalid json`);
   }
   return configObject;
+}
+
+/**
+ * Output debugging information.
+ * @param  {any[]} args
+ * @returns {void}
+ */
+function debug(...args) {
+  console.info(`${GREEN}[DEBUG]`, ...args, EOS);
 }

@@ -13,7 +13,7 @@ var _validate = require("./validate");
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:15:17
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-04 15:14:48
+ * @LastEditTime: 2023-09-06 18:16:34
  * @Description: options parse
  */
 
@@ -36,7 +36,7 @@ const parseOptions = async options => {
 /**
  * confirm message by prompt
  */
-const commitMessageByPrompt = () => {
+function commitMessageByPrompt() {
   (0, _inquiry.inquiryProcess)().then(answer => {
     const {
       type,
@@ -45,26 +45,36 @@ const commitMessageByPrompt = () => {
       body,
       footer
     } = answer;
-    let message = scope ? type + '(' + scope + ')' : type;
-    message += `: ${subject}`;
-    (0, _commit.commit)(process.cwd(), message, {}, function (error) {
-      if (error) {
-        console.log(error);
-        return;
-      }
-      (0, _log.log)(process.cwd(), function (logOutput) {
-        console.log(logOutput);
-      });
-    });
+    commitByMessage(type, scope, subject);
   });
-};
+}
 
 /**
  * confirm message by input
  */
-const commitMessageByInput = message => {
-  const matches = (0, _validate.resolvePatterns)(message);
-  console.log('matches', matches);
-};
+function commitMessageByInput(message) {
+  const isValid = (0, _validate.validateMessage)(message);
+  if (isValid) {
+    const {
+      type,
+      scope,
+      subject
+    } = (0, _validate.resolvePatterns)(message);
+    commitByMessage(type, scope, subject);
+  }
+}
+function commitByMessage(type, scope, subject) {
+  let message = scope ? type + '(' + scope + ')' : type;
+  message += `: ${subject}`;
+  (0, _commit.commit)(process.cwd(), message, {}, function (error) {
+    if (error) {
+      console.log(error);
+      return;
+    }
+    (0, _log.log)(process.cwd(), function (logOutput) {
+      console.log(logOutput);
+    });
+  });
+}
 var _default = parseOptions;
 exports.default = _default;

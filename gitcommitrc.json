@@ -2,43 +2,43 @@
   "types": [
     {
       "value": "feat",
-      "name": "feat:     A new feature "
+      "name": "A new feature "
     },
     {
       "value": "fix",
-      "name": "fix:      A bug fix "
+      "name": "A bug fix "
     },
     {
       "value": "docs",
-      "name": "docs:     Documentation only changes "
+      "name": "Documentation only changes "
     },
     {
       "value": "style",
-      "name": "style:    Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) "
+      "name": "Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) "
     },
     {
       "value": "refactor",
-      "name": "refactor: A code change that neither fixes a bug nor adds a feature "
+      "name": "A code change that neither fixes a bug nor adds a feature "
     },
     {
       "value": "perf",
-      "name": "perf:     A code change that improves performance"
+      "name": "A code change that improves performance"
     },
     {
       "value": "test",
-      "name": "test:     Adding missing tests or correcting existing tests"
+      "name": "Adding missing tests or correcting existing tests"
     },
     {
       "value": "cli",
-      "name": "cli:      Modify configuration files or scripts for CI"
+      "name": "Modify configuration files or scripts for CI"
     },
     {
       "value": "build",
-      "name": "build:    Build tools or modify dependency packages"
+      "name": "Build tools or modify dependency packages"
     },
     {
       "value": "chore",
-      "name": "chore:    Change the build process or auxiliary tools and libraries such as documentation generation"
+      "name": "Change the build process or auxiliary tools and libraries such as documentation generation"
     }
   ],
   "messages": {
@@ -48,7 +48,9 @@
     "body": "(body) Provide a longer description of change, Wrap with :\n",
     "footer": "(footer) List any breaking changes:"
   },
+  "maxLen": 100,
+  "minLen": 0,
   "subjectLimit": 50,
-  "skipQuestions": [],
-  "requiredAnswers": ["type", "scope", "subject"]
+  "skipQuestions": ["body", "footer"],
+  "scopeRequired": false
 }
