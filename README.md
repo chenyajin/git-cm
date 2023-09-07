@@ -11,6 +11,9 @@
   <img src="https://visitor-badge.glitch.me/badge?page_id=legend80s/commit-msg-linter&left_color=blue&right_color=green" alt="visitor count" />
 </p>
 
+- [English](https://github.com/chenyajin/git-cm/blob/main/README.md)
+- [简体中文](https://github.com/chenyajin/git-cm/blob/main/README-zh.md)
+
 > A lightweight, independent, 0 configurations git commit message tool
 >
 > ✨ Allow one-time input of the commit message and then verify it to ensure compliance with [AngularJS's commit message convention](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines).
