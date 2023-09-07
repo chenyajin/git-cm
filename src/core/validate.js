@@ -2,7 +2,7 @@
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:47:39
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-06 18:18:51
+ * @LastEditTime: 2023-09-07 15:52:50
  * @Description: verify format of the commit message
  */
 import {
@@ -14,7 +14,8 @@ import chalk from 'chalk'
 
 export {
   validateMessage,
-  resolvePatterns
+  resolvePatterns,
+  getMergedTypesObj
 }
 
 const langs = getLangs()
@@ -29,27 +30,30 @@ const langs = getLangs()
 function validateMessage (message) {
   let isValid = true
   let invalidLength = false
+  const messageLength = message.length || 0
 
   // 取配置参数
   const mergedTypes = getMergedTypesObj()
+  const types = Object.keys(mergedTypes)
   const maxLen = config.maxLen
   const minLen = config.minLen || 0
   const scopeRequired = config.scopeRequired
   const showInvalidHeader = true
 
-  if (message.length > maxLen || message.length < minLen) {
+  if (messageLength > maxLen || messageLength < minLen) {
     invalidLength = true
     isValid = false
   }
 
-  const matches = resolvePatterns(message)
+  const matches = resolvePatterns(message, types)
 
   if (!matches) {
     displayError(
       {
         invalidFormat: true,
         invalidType: true,
-        invalidLength: true
+        invalidSubject: true,
+        invalidLength: invalidLength
       },
       {
         mergedTypes,
@@ -63,14 +67,12 @@ function validateMessage (message) {
     return false
   }
 
-  const { type, scope, subject } =  matches || {}
-  debug(`type: ${type}, scope: ${scope}, subject: ${subject}`);
+  const { type, scope, subject = '' } = matches || {}
 
-  const types = Object.keys(mergedTypes)
   const invalidType = !types.includes(type)
   const [invalidScope, reason] = isInvalidScope(scope, { scopeRequired })
   // Don't capitalize first letter; No dot (.) at the end
-  const invalidSubject = isUpperCase(subject[0]) || subject.endsWith('.');
+  const invalidSubject = !subject.length || isUpperCase(subject[0]) || subject.endsWith('.')
 
   isValid = !invalidLength && !invalidType && !invalidScope && !invalidSubject
   if (invalidLength || invalidType || invalidScope || invalidSubject) {
@@ -93,31 +95,37 @@ function validateMessage (message) {
 }
 
 /** verify format of the message */
-function resolvePatterns (message) {
-  const PATTERN = /^(?:\s*)?(\w*)(\(([\w\$\.\*/-]*)\))?\: (.*)$/;
-  const matches = PATTERN.exec(message);
+function resolvePatterns (message, types) {
+  const PATTERN = /^(?:\s*)?(\w*)(\(([\w\$\.\*/-]*)\))?!?\: (.*)$/
+  const matches = PATTERN.exec(message)
 
   if (matches) {
-    const type = matches[1];
-    const scope = matches[3];
-    const subject = matches[4];
+    const type = matches[1]
+    const scope = matches[3]
+    const subject = matches[4]
 
     return {
       type,
       scope,
       subject,
-    };
+    }
   }
 
-  return null;
+  if (types.includes(message)) {
+    return {
+      type: message
+    }
+  }
+
+  return null
 }
 
 /** verify scope */
 function isInvalidScope (scope, { scopeRequired }) {
-  const trimScope = scope && scope.trim();
+  const trimScope = scope && scope.trim()
 
   if (scopeRequired) {
-    if (!trimScope) return [true, 'SCOPE_REQUIRED'];
+    if (!trimScope) return [true, 'SCOPE_REQUIRED']
   }
 
   if (typeof scope === 'string') {
@@ -125,7 +133,7 @@ function isInvalidScope (scope, { scopeRequired }) {
     // @example
     // "test: hello" OK
     // "test(): hello" FAILED
-    if (trimScope === '') { return [true, 'SCOPE_EMPTY_STRING']; }
+    if (trimScope === '') { return [true, 'SCOPE_EMPTY_STRING'] }
   }
 
   return [false];
@@ -149,34 +157,34 @@ function displayError (
     scopeRequired,
   },
 ) {
-  const decoratedType = addPeripherals('type', true);
-  const scope = addPeripherals('scope', scopeRequired);
-  const subject = addPeripherals('subject', true);
+  const decoratedType = addPeripherals('type', true)
+  const scope = addPeripherals('scope', scopeRequired)
+  const subject = addPeripherals('subject', true)
 
-  const types = Object.keys(mergedTypes);
-  const suggestedType = suggestType(type, types);
-  const typeDescriptions = describeTypes(mergedTypes, suggestedType);
+  const types = Object.keys(mergedTypes)
+  const suggestedType = suggestType(type, types)
+  const typeDescriptions = describeTypes(mergedTypes, suggestedType)
 
-  const invalid = invalidLength || invalidFormat || invalidType || invalidScope || invalidSubject;
+  const invalid = invalidLength || invalidFormat || invalidType || invalidScope || invalidSubject
   const langKeys = Object.keys(langs)
   const lang = langKeys.includes(config.lang) ? config.lang : 'en-US'
-  const translated = langs[lang].i18n;
-  const { invalidHeader } = translated;
+  const translated = langs[lang].i18n
+  const { invalidHeader } = translated
   const header = !showInvalidHeader
     ? ''
     : chalk.redBright(`\n  ************* ${invalidHeader} **************`);
-  
-  const { scope: scopeDescriptions, subject: subjectDescriptions, example: exampleMessage } = langs[lang].descriptions
-  const scopeDescription = scopeDescriptions.join('\n    ');
-  const subjectDescription = subjectDescriptions.join('\n    ');
-  const { example: labelExample, correctFormat, commitMessage } = translated;
 
-  const correctedExample = invalidType ? didYouMean(message, {types, example: exampleMessage}) : exampleMessage;
+  const { scope: scopeDescriptions, subject: subjectDescriptions, example: exampleMessage } = langs[lang].descriptions
+  const scopeDescription = scopeDescriptions.join('\n    ')
+  const subjectDescription = subjectDescriptions.join('\n    ')
+  const { example: labelExample, correctFormat, commitMessage } = translated
+
+  const correctedExample = invalidType ? didYouMean(message, { types, example: exampleMessage }) : exampleMessage
 
   console.info(
     `${header}${`
   ${label(`${commitMessage}:`)}  ${chalk.redBright(message)}`}${generateInvalidLengthTips(message, invalidLength, maxLen, minLen, lang)}
-  ${label(`${correctFormat}:`)} ${chalk.greenBright(`${decoratedType}${scope}: ${subject}`)}
+  ${label(`${correctFormat}:`)} ${invalidType ? chalk.redBright(decoratedType) : chalk.greenBright(decoratedType)} ${invalidScope ? chalk.redBright(scope) : chalk.greenBright(scope)} ${invalidSubject ? chalk.redBright(subject) : chalk.greenBright(subject)}
   ${label(`${labelExample}:`)} ${chalk.greenBright(`${correctedExample}`)}
   
   ${invalidType ? chalk.redBright('type:') : chalk.yellowBright('type:')}
@@ -192,11 +200,11 @@ function displayError (
 }
 
 
-function getMergedTypesObj() {
+function getMergedTypesObj () {
   let types = {};
-    (config.types || []).forEach(item => {
-      types[item.value] = item.name
-    })
+  (config.types || []).forEach(item => {
+    types[item.value] = item.name
+  })
   return types
 }
 
@@ -217,10 +225,10 @@ function getMergedTypesObj() {
  */
 function addPeripherals (text, required = true) {
   if (required) {
-    return `<${text}>`;
+    return `<${text}>`
   }
 
-  return `(${text})`;
+  return `(${text})`
 }
 
 /**
@@ -229,19 +237,19 @@ function addPeripherals (text, required = true) {
  * @returns {boolean}
  */
 function isUpperCase (letter) {
-  return /^[A-Z]$/.test(letter);
+  return /^[A-Z]$/.test(letter)
 }
 
 function suggestType (type = '', types) {
 
-  const suggestedType = types.find((t) => type.includes(t) || t.includes(type));
+  const suggestedType = types.find((t) => type.includes(t) || t.includes(type))
 
-  return suggestedType || '';
+  return suggestedType || ''
 }
 
 function describeTypes (mergedTypes, suggestedType = '') {
-  const types = Object.keys(mergedTypes);
-  const maxTypeLength = [...types].sort((t1, t2) => t2.length - t1.length)[0].length;
+  const types = Object.keys(mergedTypes)
+  const maxTypeLength = [...types].sort((t1, t2) => t2.length - t1.length)[0].length
 
   return types
     .map((type, index) => {
@@ -264,13 +272,13 @@ function describeTypes (mergedTypes, suggestedType = '') {
  *
  * @returns {string}
  */
-function describe({
+function describe ({
   index, type, description, maxTypeLength,
 }) {
-  const paddingBefore = index === 0 ? '' : nSpaces(4);
-  const marginRight = nSpaces(maxTypeLength - type.length + 1);
+  const paddingBefore = index === 0 ? '' : nSpaces(4)
+  const marginRight = nSpaces(maxTypeLength - type.length + 1)
 
-  return `${paddingBefore}${chalk.yellow(type)}${marginRight}${chalk.bold(description)}`;
+  return `${paddingBefore}${chalk.yellow(type)}${marginRight}${chalk.bold(description)}`
 }
 
 /**
@@ -279,7 +287,7 @@ function describe({
  * @param  {number}
  * @return {string}
  */
-function nSpaces(n) {
+function nSpaces (n) {
   const space = ' ';
 
   return space.repeat(n);
@@ -290,7 +298,7 @@ function nSpaces(n) {
  * @param {string} text
  * @returns {string}
  */
-function label(text) {
+function label (text) {
   return chalk.bold(text);
 }
 
@@ -304,13 +312,13 @@ function label(text) {
  * @param {string} lang
  * @returns {string}
  */
-function generateInvalidLengthTips(message, invalid, maxLen, minLen, lang) {
+function generateInvalidLengthTips (message, invalid, maxLen, minLen, lang) {
   if (invalid) {
-    const max = chalk.redBright(maxLen);
-    const min = chalk.redBright(minLen);
-    const { i18n } = langs[lang];
-    const tips = `${chalk.redBright(i18n.length)} ${chalk.magenta(message.length)}. ${chalk.bold.redBright(format(i18n.invalidLengthTip, max, min))}`;
-    return `\n  ${chalk.bold(i18n.invalidLength)}: ${tips}`;
+    const max = chalk.redBright(maxLen)
+    const min = chalk.redBright(minLen)
+    const { i18n } = langs[lang]
+    const tips = `${chalk.redBright(i18n.length)} ${chalk.magenta(message.length || 0)}. ${chalk.bold.redBright(format(i18n.invalidLengthTip, max, min))}`
+    return `\n  ${chalk.bold(i18n.invalidLength)}: ${tips}`
   }
 
   return '';
@@ -323,27 +331,31 @@ function generateInvalidLengthTips(message, invalid, maxLen, minLen, lang) {
  * @param  {any[]} args Values to replace the arguments
  * @returns
  */
-function format(text, ...args) {
-  return text.replace(/\{(\d+)\}/g, (_, i) => chalk.magenta(args[i - 1]));
+function format (text, ...args) {
+  return text.replace(/\{(\d+)\}/g, (_, i) => chalk.magenta(args[i - 1]))
 }
 
-function didYouMean(message, { types, example }) {
-  const patterns = resolvePatterns(message);
+function didYouMean (message, { types, example }) {
+  const patterns = resolvePatterns(message, types)
 
-  if (!patterns && !patterns.type) {
-    return example;
+  if (!patterns || !patterns.type) {
+    return example
   }
 
-  const { type } = patterns;
+  const { type, scope, subject } = patterns;
 
   // Get the closest match
-  const suggestedType = suggestType(type, types);
+  const suggestedType = suggestType(type, types)
 
   if (!suggestedType) {
-    return example;
+    return example
   }
 
-  const TYPE_REGEXP = /^\w+(\(\w*\))?:/;
+  if (!subject) {
+    return example
+  }
 
-  return message.replace(TYPE_REGEXP, (_, p1) => (p1 && p1 !== '()' ? `${suggestedType}${p1}:` : `${suggestedType}:`));
+  const TYPE_REGEXP = /^\w+(\(\w*\))?:/
+
+  return message.replace(TYPE_REGEXP, (_, p1) => (p1 && p1 !== '()' ? `${suggestedType}${p1}:` : `${suggestedType}:`))
 }

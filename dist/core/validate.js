@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getMergedTypesObj = getMergedTypesObj;
 exports.resolvePatterns = resolvePatterns;
 exports.validateMessage = validateMessage;
 var _index = require("../utils/index");
@@ -13,7 +14,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:47:39
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-06 18:18:51
+ * @LastEditTime: 2023-09-07 15:52:50
  * @Description: verify format of the commit message
  */
 
@@ -29,23 +30,26 @@ const langs = (0, _lang.default)();
 function validateMessage(message) {
   let isValid = true;
   let invalidLength = false;
+  const messageLength = message.length || 0;
 
   // 取配置参数
   const mergedTypes = getMergedTypesObj();
+  const types = Object.keys(mergedTypes);
   const maxLen = _index.config.maxLen;
   const minLen = _index.config.minLen || 0;
   const scopeRequired = _index.config.scopeRequired;
   const showInvalidHeader = true;
-  if (message.length > maxLen || message.length < minLen) {
+  if (messageLength > maxLen || messageLength < minLen) {
     invalidLength = true;
     isValid = false;
   }
-  const matches = resolvePatterns(message);
+  const matches = resolvePatterns(message, types);
   if (!matches) {
     displayError({
       invalidFormat: true,
       invalidType: true,
-      invalidLength: true
+      invalidSubject: true,
+      invalidLength: invalidLength
     }, {
       mergedTypes,
       maxLen,
@@ -59,16 +63,14 @@ function validateMessage(message) {
   const {
     type,
     scope,
-    subject
+    subject = ''
   } = matches || {};
-  (0, _index.debug)(`type: ${type}, scope: ${scope}, subject: ${subject}`);
-  const types = Object.keys(mergedTypes);
   const invalidType = !types.includes(type);
   const [invalidScope, reason] = isInvalidScope(scope, {
     scopeRequired
   });
   // Don't capitalize first letter; No dot (.) at the end
-  const invalidSubject = isUpperCase(subject[0]) || subject.endsWith('.');
+  const invalidSubject = !subject.length || isUpperCase(subject[0]) || subject.endsWith('.');
   isValid = !invalidLength && !invalidType && !invalidScope && !invalidSubject;
   if (invalidLength || invalidType || invalidScope || invalidSubject) {
     displayError({
@@ -90,8 +92,8 @@ function validateMessage(message) {
 }
 
 /** verify format of the message */
-function resolvePatterns(message) {
-  const PATTERN = /^(?:\s*)?(\w*)(\(([\w\$\.\*/-]*)\))?\: (.*)$/;
+function resolvePatterns(message, types) {
+  const PATTERN = /^(?:\s*)?(\w*)(\(([\w\$\.\*/-]*)\))?!?\: (.*)$/;
   const matches = PATTERN.exec(message);
   if (matches) {
     const type = matches[1];
@@ -101,6 +103,11 @@ function resolvePatterns(message) {
       type,
       scope,
       subject
+    };
+  }
+  if (types.includes(message)) {
+    return {
+      type: message
     };
   }
   return null;
@@ -172,7 +179,7 @@ function displayError({
   }) : exampleMessage;
   console.info(`${header}${`
   ${label(`${commitMessage}:`)}  ${_chalk.default.redBright(message)}`}${generateInvalidLengthTips(message, invalidLength, maxLen, minLen, lang)}
-  ${label(`${correctFormat}:`)} ${_chalk.default.greenBright(`${decoratedType}${scope}: ${subject}`)}
+  ${label(`${correctFormat}:`)} ${invalidType ? _chalk.default.redBright(decoratedType) : _chalk.default.greenBright(decoratedType)} ${invalidScope ? _chalk.default.redBright(scope) : _chalk.default.greenBright(scope)} ${invalidSubject ? _chalk.default.redBright(subject) : _chalk.default.greenBright(subject)}
   ${label(`${labelExample}:`)} ${_chalk.default.greenBright(`${correctedExample}`)}
   
   ${invalidType ? _chalk.default.redBright('type:') : _chalk.default.yellowBright('type:')}
@@ -299,7 +306,7 @@ function generateInvalidLengthTips(message, invalid, maxLen, minLen, lang) {
     const {
       i18n
     } = langs[lang];
-    const tips = `${_chalk.default.redBright(i18n.length)} ${_chalk.default.magenta(message.length)}. ${_chalk.default.bold.redBright(format(i18n.invalidLengthTip, max, min))}`;
+    const tips = `${_chalk.default.redBright(i18n.length)} ${_chalk.default.magenta(message.length || 0)}. ${_chalk.default.bold.redBright(format(i18n.invalidLengthTip, max, min))}`;
     return `\n  ${_chalk.default.bold(i18n.invalidLength)}: ${tips}`;
   }
   return '';
@@ -319,17 +326,22 @@ function didYouMean(message, {
   types,
   example
 }) {
-  const patterns = resolvePatterns(message);
-  if (!patterns && !patterns.type) {
+  const patterns = resolvePatterns(message, types);
+  if (!patterns || !patterns.type) {
     return example;
   }
   const {
-    type
+    type,
+    scope,
+    subject
   } = patterns;
 
   // Get the closest match
   const suggestedType = suggestType(type, types);
   if (!suggestedType) {
+    return example;
+  }
+  if (!subject) {
     return example;
   }
   const TYPE_REGEXP = /^\w+(\(\w*\))?:/;

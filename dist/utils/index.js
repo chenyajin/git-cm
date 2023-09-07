@@ -18,9 +18,15 @@ const localConfig = readLocalConfig();
 const defaultConfig = readDefaultConfig();
 const config = _objectSpread(_objectSpread({}, defaultConfig), localConfig);
 
-/** Read local configuration file */
-/** If the current directory does not have a configuration file, read the default file */
+/** Used to prompt for correct formatting */
 exports.config = config;
+const defaultSubjectTip = {};
+
+/**
+ * Read local configuration file
+ *  If the current directory does not have a configuration file, read the default file 
+ * @returns {object}
+ */
 function readLocalConfig() {
   let filename = _path.default.resolve(process.cwd(), 'gitcommitrc.json');
   let packageName = _chalk.default.yellowBright('git-cm');
@@ -50,7 +56,10 @@ function readLocalConfig() {
   return configObject;
 }
 
-/** read the default configuration file */
+/**
+ * Read the default configuration file 
+ * @returns {object}
+ */
 function readDefaultConfig() {
   const filename = _path.default.resolve(__dirname, '../../gitcommitrc.json');
   let packageName = _chalk.default.yellowBright('git-cm');
@@ -85,3 +94,4 @@ function readDefaultConfig() {
 function debug(...args) {
   console.info(_chalk.default.greenBright('[DEBUG]'), ...args);
 }
+function getSubjectTipByType() {}

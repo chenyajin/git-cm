@@ -13,7 +13,7 @@ var _validate = require("./validate");
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:15:17
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-06 18:16:34
+ * @LastEditTime: 2023-09-07 15:09:31
  * @Description: options parse
  */
 
@@ -59,7 +59,7 @@ function commitMessageByInput(message) {
       type,
       scope,
       subject
-    } = (0, _validate.resolvePatterns)(message);
+    } = (0, _validate.resolvePatterns)(message, []);
     commitByMessage(type, scope, subject);
   }
 }

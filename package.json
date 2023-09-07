@@ -1,6 +1,6 @@
 {
   "name": "git-cm",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "a simple version of the git commit",
   "main": "index.js",
   "scripts": {
@@ -16,6 +16,7 @@
   "keywords": [
     "git",
     "commit",
+    "message",
     "cli"
   ],
   "bugs": {

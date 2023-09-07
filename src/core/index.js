@@ -2,14 +2,14 @@
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:15:17
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-06 18:16:34
+ * @LastEditTime: 2023-09-07 15:09:31
  * @Description: options parse
  */
 import { inquiryProcess } from './inquiry'
 import { log } from './log'
 import { commit } from './commit'
 import { addAll } from './add'
-import { validateMessage, resolvePatterns } from './validate'
+import { validateMessage, resolvePatterns, getMergedTypesObj } from './validate'
 
 /**
  * git-cm -a
@@ -43,7 +43,7 @@ function commitMessageByPrompt () {
 function commitMessageByInput (message) {
   const isValid = validateMessage(message)
   if (isValid) {
-    const { type, scope, subject } = resolvePatterns(message)
+    const { type, scope, subject } = resolvePatterns(message, [])
     commitByMessage(type, scope, subject)
   }
 }

@@ -6,21 +6,19 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 const help = argv => {
   console.log(`
-  simple-cli has two command line tools:
+  git-cm <command>:
 
-    1) cm         -- used for making commits
+  description: Choose different types and enter the main information
+                to complete the submission of the git commit.
 
-    2) git-cm     -- alias for 'cz'
+  Usage:
+   
+  git-cm -a    submit the current changes to the Stage
+  git-cm -m   submit commit information
+  git-cm -am  after submitting the current changes to the Stage, Submit commit information
 
-  Detailed usage:
-    
-    1) cm <sub-command>
-
-        description: Choose different types and enter the main information
-                          to complete the submission of the git commit.
-
-        args:
-          --add    Whether to submit the current changes to the Stage
+  git-cm use   more help 
+  git-cm -u    more help
 
   `);
 };

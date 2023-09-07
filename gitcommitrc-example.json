@@ -49,7 +49,7 @@
     "footer": "(footer) List any breaking changes:"
   },
   "maxLen": 100,
-  "minLen": 2,
+  "minLen": 0,
   "subjectLimit": 50,
   "skipQuestions": ["body", "footer"],
   "scopeRequired": false,
