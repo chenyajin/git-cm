@@ -8,7 +8,6 @@
     <img src="https://img.shields.io/npm/dm/git-cm.svg" alt="npm downloads" />
   </a>
   <img src="https://img.shields.io/badge/node-%3E%3D%2016.0.0-blue.svg" alt="prerequisite node version" />
-  <img src="https://visitor-badge.glitch.me/badge?page_id=legend80s/commit-msg-linter&left_color=blue&right_color=green" alt="visitor count" />
 </p>
 
 - [English](https://github.com/chenyajin/git-cm/blob/main/README.md)
@@ -21,6 +20,10 @@
 > ✨ Allow customization of your commit information through inquiry
 >
 > ✨ Allow adding configuration files in the project and customizing your git commit message,or using default configurations.
+
+![git-cm-verify-demo](https://raw.githubusercontent.com/chenyajin/git-cm/dev/assets/messsage_verify_en.png)
+
+![git-cm-select-demo](https://raw.githubusercontent.com/chenyajin/git-cm/dev/assets/select_success_en.png)
 
 ## Installing the command line tool
 
@@ -56,7 +59,7 @@ or as an npm script:
 
 when you use `git-cm`, without a committing message, you'll be prompted to fill out any required commit fields at commit time with a format of the default configuration file.
 
-you can see the format of the default configuration file in [gitcommitrc-example.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc-example.json)
+you can see the format of the default configuration file in [gitcommitrc.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc.json)
 
 Of course, you can also create `gitcommitrc.json` file below in the root directory of your project, to overwriting the default file.
 
@@ -79,15 +82,15 @@ when you use `git-cm`, with a committing message, such as `git-cm -m 'type(scope
 
 The `<type>` and `<summary>` fields are mandatory, the `(<scope>)` field is optional.
 
-Bad:
+❌ Bad:
 
 > update README to add how to install
 
-Good:
+✅ Good:
 
 > docs: update README to add how to install
 
-Good (commit message with scope):
+✅ Good (commit message with scope):
 
 > docs(README): update README to add how to install
 
@@ -107,8 +110,11 @@ Except for default types, you can add, overwrite.
 
 For example if you have this `gitcommitrc.json` file below in the root directory of your project:
 
+you can see the format of the example configuration file in [gitcommitrc-example.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc-example.json)
+
 <details>
  <summary>More advanced settings</summary>
+
 ```json
 {
   "types": [
@@ -168,6 +174,7 @@ For example if you have this `gitcommitrc.json` file below in the root directory
   "lang": "en-US"
 }
 ```
+
 </details>
 
 ## Features
@@ -178,3 +185,7 @@ For example if you have this `gitcommitrc.json` file below in the root directory
 4. Prompt error msg precisely, friendly to commit message format unfamiliar developers.
 5. i18n: **en-US**, **zh-CN** supported.
 6. The linter is customizable for your team by configuring local files.
+
+```
+
+```
