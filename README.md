@@ -22,6 +22,10 @@
 >
 > ✨ Allow adding configuration files in the project and customizing your git commit message,or using default configurations.
 
+![git-cm-verify-demo](https://raw.githubusercontent.com/chenyajin/git-cm/dev/assets/messsage_verify_en.png)
+
+![git-cm-select-demo](https://raw.githubusercontent.com/chenyajin/git-cm/dev/assets/select_success_en.png)
+
 ## Installing the command line tool
 
 Installation is as simple as running the following command (if you see `EACCES` error, reading [fixing npm permissions](https://docs.npmjs.com/getting-started/fixing-npm-permissions) may help):
