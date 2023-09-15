@@ -18,15 +18,12 @@ const localConfig = readLocalConfig();
 const defaultConfig = readDefaultConfig();
 const config = _objectSpread(_objectSpread({}, defaultConfig), localConfig);
 
-/** Used to prompt for correct formatting */
-exports.config = config;
-const defaultSubjectTip = {};
-
 /**
  * Read local configuration file
  *  If the current directory does not have a configuration file, read the default file 
  * @returns {object}
  */
+exports.config = config;
 function readLocalConfig() {
   let filename = _path.default.resolve(process.cwd(), 'gitcommitrc.json');
   let packageName = _chalk.default.yellowBright('git-cm');
@@ -61,7 +58,8 @@ function readLocalConfig() {
  * @returns {object}
  */
 function readDefaultConfig() {
-  const filename = _path.default.resolve(__dirname, '../../gitcommitrc.json');
+  const defaultConfigName = localConfig && localConfig.lang === 'zh-CN' ? 'gitcommitrc-zh.json' : 'gitcommitrc.json';
+  const filename = _path.default.resolve(__dirname, `../../${defaultConfigName}`);
   let packageName = _chalk.default.yellowBright('git-cm');
   let content = '{}';
   try {
