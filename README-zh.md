@@ -8,20 +8,22 @@
     <img src="https://img.shields.io/npm/dm/git-cm.svg" alt="npm downloads" />
   </a>
   <img src="https://img.shields.io/badge/node-%3E%3D%2016.0.0-blue.svg" alt="prerequisite node version" />
-  <img src="https://visitor-badge.glitch.me/badge?page_id=legend80s/commit-msg-linter&left_color=blue&right_color=green" alt="visitor count" />
 </p>
 
 - [English](https://github.com/chenyajin/git-cm/blob/main/README.md)
 - [简体中文](https://github.com/chenyajin/git-cm/blob/main/README-zh.md)
 
-> 一款 轻量级、0配置，也可支持定制化的 git commit message 命令行工具
+> 一款 轻量级、0 配置，也可支持定制化的 git commit message 命令行工具
 >
 > ✨ 支持校验格式：允许手动输入提交消息，然后对其进行验证，以确保符合 [AngularJS 提交规范](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)。
 >
-> ✨ 询问式交互：允许通过询问式交互选择commit 信息。
+> ✨ 询问式交互：允许通过询问式交互选择 commit 信息。
 >
 > ✨ 定制化：允许在项目根目录中添加配置文件 去重写/覆盖默认配置。
->
+
+![git-cm-verify-demo](https://raw.githubusercontent.com/chenyajin/git-cm/dev/assets/messsage_verify_en.png)
+
+![git-cm-select-demo](https://raw.githubusercontent.com/chenyajin/git-cm/dev/assets/select_success_en.png)
 
 ## 安装命令行工具
 
@@ -57,9 +59,9 @@ git-cm -am 'type(scope): subject'
 
 当使用 git-cm 时，在没有携带 commit 消息的情况下，系统会发起询问式选择，让用户自主选择提交的 <type> (scope)<subject>, 选择的内容配置按照默认的配置引导，如果当前项目根目录下有配置 gitcommitrc.json，则按照配置的规则来引导。
 
-当使用 git-cm -m 'type(scope): subject' 时，在携带 commit 消息的情况下，系统将去验证这条 commit 信息是否符合 AngularJS提交规范，如果不符合，则给出对应提示，如果符合，则继续提交。
+当使用 git-cm -m 'type(scope): subject' 时，在携带 commit 消息的情况下，系统将去验证这条 commit 信息是否符合 AngularJS 提交规范，如果不符合，则给出对应提示，如果符合，则继续提交。
 
-您可以在[gitcommitrc-example.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc-example.json)中查看默认配置文件的格式
+您可以在[gitcommitrc.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc.json)中查看默认配置文件的格式
 
 当然，您也可以在项目的根目录中创建下面的“gitcommitrc.json”文件，以覆盖默认文件。
 
@@ -78,20 +80,19 @@ git-cm -am 'type(scope): subject'
   └─⫸ Commit Type: feat|fix|docs|style|refactor|test|chore|perf|ci|build|chore
 ```
 
-<type> 和 <subject> 字段是强制性必填的，scope 是选填的。
+\<type> 和 \<subject> 字段是强制性必填的，scope 是选填的。
 
 ❌ 不推荐的:
 
 > update README to add how to install
 
-✅ 推荐的::
+✅ 推荐的:
 
 > docs: update README to add how to install
 
 ✅ 推荐的: (带有 scope 的):
 
 > docs(README): update README to add how to install
-
 
 ## 零配置
 
@@ -114,7 +115,6 @@ git-cm -am 'type(scope): subject'
 > `scopeRequired`: {boolean}, scope 变更范围的填写，是否必填，默认 false;
 >
 > `lang`: 询问交互中提示的语言，支持 en-US、zh-CN, 默认 en-US；
-
 
 <details>
 
@@ -179,6 +179,7 @@ git-cm -am 'type(scope): subject'
   "lang": "en-US"
 }
 ```
+
 </details>
 
 ## gitcommitrc.json
@@ -187,7 +188,9 @@ git-cm -am 'type(scope): subject'
 
 最后项目配置将取 默认配置文件和本地配置文件 gitcommitrc.json 的并集：
 
->   const config = { ...defaultConfig, ...localConfig }
+> const config = { ...defaultConfig, ...localConfig }
+
+配置范例 [gitcommitrc-example.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc-example.json)中查看配置文件的格式
 
 ## 特性
 
@@ -195,11 +198,10 @@ git-cm -am 'type(scope): subject'
 
 2、零配置：安装即可使用；
 
-3、校验格式：允许手动输入提交消息，验证符合 [AngularJS提交规范](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)，给出提示；
+3、校验格式：允许手动输入提交消息，验证符合 [AngularJS 提交规范](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)，给出提示；
 
 4、询问式交互：允许通过询问式交互自定义提交信息；
 
 5、定制化：支持本地配置文件，自定义提交规则；
 
-6、支持i18n：支持配置 中文/英文，默认英文；
-
+6、支持 i18n：支持配置 中文/英文，默认英文；
