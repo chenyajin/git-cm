@@ -8,12 +8,13 @@ var _child_process = require("child_process");
 var _path = _interopRequireDefault(require("path"));
 var _fs = require("fs");
 var _dedent = _interopRequireDefault(require("dedent"));
+var _index = require("../utils/index");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 /*
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:15:17
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-04 09:48:10
+ * @LastEditTime: 2023-09-15 14:51:56
  * @Description: commit core
  */
 
@@ -36,12 +37,15 @@ function commitCore(repoPath, message, options, done) {
   if (!options.hookMode) {
     let args = ['commit', '-m', (0, _dedent.default)(message)];
     let child = (0, _child_process.spawn)('git', args);
+    child.stdout.on('data', data => {
+      console.log('\n', data.toString());
+    });
     child.on('error', function (err) {
       if (called) return;
       called = true;
       done(err);
     });
-    child.on('close', function (code, signal) {
+    child.on('exit', function (code, signal) {
       if (called) return;
       called = true;
       if (code) {
@@ -53,10 +57,7 @@ function commitCore(repoPath, message, options, done) {
               git config --global user.name "Your Name"
             `);
         }
-        done(Object.assign(new Error(`git exited with error code ${code}`), {
-          code,
-          signal
-        }));
+        // done(Object.assign(new Error(`git exited with error code ${code}`), { code, signal }));
       } else {
         done(null);
       }
