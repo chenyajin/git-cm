@@ -2,7 +2,7 @@
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:15:17
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-07 15:09:31
+ * @LastEditTime: 2023-09-15 11:50:40
  * @Description: options parse
  */
 import { inquiryProcess } from './inquiry'
@@ -10,6 +10,7 @@ import { log } from './log'
 import { commit } from './commit'
 import { addAll } from './add'
 import { validateMessage, resolvePatterns, getMergedTypesObj } from './validate'
+import { debug } from '../utils'
 
 /**
  * git-cm -a
@@ -55,10 +56,11 @@ function commitByMessage (type, scope, subject) {
     if (error) {
       console.log(error)
       return
+    } else {
+      log(process.cwd(), function (logOutput) {
+        console.log(logOutput)
+      });
     }
-    log(process.cwd(), function (logOutput) {
-      console.log(logOutput)
-    });
   })
 }
 
