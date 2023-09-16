@@ -12,12 +12,6 @@ const localConfig = readLocalConfig()
 const defaultConfig = readDefaultConfig()
 const config = { ...defaultConfig, ...localConfig }
 
-/** Used to prompt for correct formatting */
-const defaultSubjectTip = {
-
-}
-
-
 /**
  * Read local configuration file
  *  If the current directory does not have a configuration file, read the default file 
@@ -61,7 +55,8 @@ function readLocalConfig () {
  * @returns {object}
  */
 function readDefaultConfig () {
-  const filename = path.resolve(__dirname, '../../gitcommitrc.json');
+  const defaultConfigName = localConfig && localConfig.lang === 'zh-CN' ? 'gitcommitrc-zh.json' : 'gitcommitrc.json'
+  const filename = path.resolve(__dirname, `../../${defaultConfigName}`);
   let packageName = chalk.yellowBright('git-cm')
   let content = '{}';
 

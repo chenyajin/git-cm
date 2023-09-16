@@ -2,13 +2,14 @@
  * @Author: ChenYaJin
  * @Date: 2023-09-04 09:15:17
  * @LastEditors: ChenYaJin
- * @LastEditTime: 2023-09-04 09:48:10
+ * @LastEditTime: 2023-09-15 14:51:56
  * @Description: commit core
  */
-import { execSync, spawn } from 'child_process';
+import { execSync, spawn, spawnSync } from 'child_process';
 import path from 'path';
 import { writeFileSync, openSync, closeSync } from 'fs';
 import dedent from 'dedent';
+import { debug } from '../utils/index';
 
 export { commit };
 
@@ -32,6 +33,10 @@ function commitCore (repoPath, message, options, done) {
     let args = ['commit', '-m', dedent(message)];
     let child = spawn('git', args);
 
+    child.stdout.on('data', (data) => {
+      console.log('\n', data.toString());
+    });
+
     child.on('error', function (err) {
       if (called) return;
       called = true;
@@ -39,7 +44,7 @@ function commitCore (repoPath, message, options, done) {
       done(err);
     });
 
-    child.on('close', function (code, signal) {
+    child.on('exit', function (code, signal) {
       if (called) return;
       called = true;
 
@@ -52,7 +57,7 @@ function commitCore (repoPath, message, options, done) {
               git config --global user.name "Your Name"
             `)
         }
-        done(Object.assign(new Error(`git exited with error code ${code}`), { code, signal }));
+        // done(Object.assign(new Error(`git exited with error code ${code}`), { code, signal }));
       } else {
         done(null);
       }
