@@ -1,3 +1,4 @@
+
 <h1 align="center">git-cm 👋</h1>
 
 <p  align="center">
@@ -10,34 +11,34 @@
   <img src="https://img.shields.io/badge/node-%3E%3D%2016.0.0-blue.svg" alt="prerequisite node version" />
 </p>
 
-- [English](https://github.com/chenyajin/git-cm/blob/main/README.md)
-- [简体中文](https://github.com/chenyajin/git-cm/blob/main/README-zh.md)
+- [English](https://github.com/chenyajin/git-cm/blob/main/README-en.md)
+- [简体中文](https://github.com/chenyajin/git-cm/blob/main/README.md)
 
-> A lightweight, independent, 0 configurations git commit message tool
+> 一款 轻量级、0 配置，也可支持定制化的 git commit message 命令行工具
 >
-> ✨ Allow one-time input of the commit message and then verify it to ensure compliance with [AngularJS's commit message convention](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines).
+> ✨ 支持校验格式：允许手动输入提交消息，然后对其进行验证，以确保符合 [AngularJS 提交规范](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)。
 >
-> ✨ Allow customization of your commit information through inquiry
+> ✨ 询问式交互：允许通过询问式交互选择 commit 信息。
 >
-> ✨ Allow adding configuration files in the project and customizing your git commit message,or using default configurations.
+> ✨ 定制化：允许在项目根目录中添加配置文件 去重写/覆盖默认配置。
 
 ![git-cm-verify-demo](https://raw.githubusercontent.com/chenyajin/git-cm/dev/assets/messsage_verify_en.png)
 
 ![git-cm-select-demo](https://raw.githubusercontent.com/chenyajin/git-cm/dev/assets/select_success_en.png)
 
-## Installing the command line tool
+## 安装命令行工具
 
-Installation is as simple as running the following command (if you see `EACCES` error, reading [fixing npm permissions](https://docs.npmjs.com/getting-started/fixing-npm-permissions) may help):
+安装很简单，只需运行以下命令 (如果您看到“EACCES”错误，请阅读 [fixing npm permissions](https://docs.npmjs.com/getting-started/fixing-npm-permissions) 查询帮助):
 
 ```sh
 npm install -g git-cm
 ```
 
-## Using the command line tool
+## 开始使用命令行
 
-Simply use `git-cm` or `cm` instead of `git commit` when committing.
+提交时只需使用 git-cm 或 cm 去代替 git commit 即可。
 
-Supported command line options
+支持一下命令行：
 
 ```sh
 git-cm
@@ -46,7 +47,7 @@ git-cm -m 'type(scope): subject'
 git-cm -am 'type(scope): subject'
 ```
 
-or as an npm script:
+或者 运行脚本的方式：
 
 ```json
   ...
@@ -57,17 +58,17 @@ or as an npm script:
 
 ---
 
-when you use `git-cm`, without a committing message, you'll be prompted to fill out any required commit fields at commit time with a format of the default configuration file.
+当使用 git-cm 时，在没有携带 commit 消息的情况下，系统会发起询问式选择，让用户自主选择提交的 <type> (scope)<subject>, 选择的内容配置按照默认的配置引导，如果当前项目根目录下有配置 gitcommitrc.json，则按照配置的规则来引导。
 
-you can see the format of the default configuration file in [gitcommitrc.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc.json)
+当使用 git-cm -m 'type(scope): subject' 时，在携带 commit 消息的情况下，系统将去验证这条 commit 信息是否符合 AngularJS 提交规范，如果不符合，则给出对应提示，如果符合，则继续提交。
 
-Of course, you can also create `gitcommitrc.json` file below in the root directory of your project, to overwriting the default file.
+您可以在[gitcommitrc.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc.json)中查看默认配置文件的格式
 
-when you use `git-cm`, with a committing message, such as `git-cm -m 'type(scope): subject'`, the message will be verified, whether to use [AngularJS's commit message convention](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines).
+当然，您也可以在项目的根目录中创建下面的“gitcommitrc.json”文件，以覆盖默认文件。
 
 ---
 
-## Recommended Commit Message Format
+## 推荐的 commit 信息格式
 
 ```
 <type>(<scope>): <short summary>
@@ -80,40 +81,45 @@ when you use `git-cm`, with a committing message, such as `git-cm -m 'type(scope
   └─⫸ Commit Type: feat|fix|docs|style|refactor|test|chore|perf|ci|build|chore
 ```
 
-The `<type>` and `<summary>` fields are mandatory, the `(<scope>)` field is optional.
+\<type> 和 \<subject> 字段是强制性必填的，scope 是选填的。
 
-❌ Bad:
+❌ 不推荐的:
 
 > update README to add how to install
 
-✅ Good:
+✅ 推荐的:
 
 > docs: update README to add how to install
 
-✅ Good (commit message with scope):
+✅ 推荐的: (带有 scope 的):
 
 > docs(README): update README to add how to install
 
-The default commit `type`s can be extended or modified by [gitcommitrc.json](https://github.com/chenyajin/git-cm/blob/main/README.md#gitcommitrc.json).
+## 零配置
 
-## Zero Configurations
+安装之后，就可以使用，所以配置文件不是必须的！如果有定制的需求，也可以支持 在项目根目录下添加 gitcommitrc.json 文件，去 重写/覆盖 默认配置。
 
-**Configurations Not Required!** If it has to be customized we have the guide below.
+默认配置 参数如下：
 
-The default `type`s includes **feat**, **fix**, **docs**, **style**, **refactor**, **test**, **chore**, **perf**, **ci**, **build** and **chore**.
-
-The default `max-len` is 100 which means the commit message cannot be longer than 100 characters. All the settings can be modified in gitcommitrc.json.
-
-### gitcommitrc.json
-
-Except for default types, you can add, overwrite.
-
-For example if you have this `gitcommitrc.json` file below in the root directory of your project:
-
-you can see the format of the example configuration file in [gitcommitrc-example.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc-example.json)
+> `types`: {Array}, 可支持的类型选择；
+>
+> `messages`: {Object}, type/scope/subject/body/footer 提示占位符；
+>
+> `maxLen`: {number}, commit 信息的最大字数长度限制，默认 100；
+>
+> `minLen`: {number}, commit 信息的最小字数长度限制，默认 0；
+>
+> `subjectLimit`: {number}, subject 简短描述最大字数限制，默认 50；
+>
+> `skipQuestions`: {Array}, 询问交互中允许跳过的步骤，默认 ["body", "footer"]；
+>
+> `scopeRequired`: {boolean}, scope 变更范围的填写，是否必填，默认 false;
+>
+> `lang`: 询问交互中提示的语言，支持 en-US、zh-CN, 默认 en-US；
 
 <details>
- <summary>More advanced settings</summary>
+
+ <summary>默认配置文件预览</summary>
 
 ```json
 {
@@ -177,15 +183,26 @@ you can see the format of the example configuration file in [gitcommitrc-example
 
 </details>
 
-## Features
+## gitcommitrc.json
 
-1. Visualization, low cost to Learn.
-2. Independent, zero configurations.
-3. Support for local configuration files and customizing your git commit message.
-4. Prompt error msg precisely, friendly to commit message format unfamiliar developers.
-5. i18n: **en-US**, **zh-CN** supported.
-6. The linter is customizable for your team by configuring local files.
+在项目根目录下，添加 gitcommitrc.json 文件，去 重写/覆盖 默认配置。具体格式可参考上面的默认配置。
 
-```
+最后项目配置将取 默认配置文件和本地配置文件 gitcommitrc.json 的并集：
 
-```
+> const config = { ...defaultConfig, ...localConfig }
+
+配置范例 [gitcommitrc-example.json](https://github.com/chenyajin/git-cm/blob/main/gitcommitrc-example.json)中查看配置文件的格式
+
+## 特性
+
+1、可视化：学习成本低，友好的界面提示；
+
+2、零配置：安装即可使用；
+
+3、校验格式：允许手动输入提交消息，验证符合 [AngularJS 提交规范](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)，给出提示；
+
+4、询问式交互：允许通过询问式交互自定义提交信息；
+
+5、定制化：支持本地配置文件，自定义提交规则；
+
+6、支持 i18n：支持配置 中文/英文，默认英文；
